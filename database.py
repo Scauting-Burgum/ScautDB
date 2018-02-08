@@ -40,6 +40,8 @@ class Database:
 		with self.get_connection() as connection:
 			connection.execute(query_string)
 
+		return self[name]
+
 	def __contains__(self, table):
 		if table == None or table.__class__ != Table or table.database != self:
 			return False
