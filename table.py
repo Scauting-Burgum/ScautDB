@@ -47,19 +47,20 @@ class Table:
 	def __ne__(self, other):
 		return not self.__eq__(other)
 
-	def insert(self, dict):
+	def insert(self, dictionary):
 		column_string = str()
 		parameter_string = str()
 		parameters = list()
 
-		for column in self.columns:
-			if column_string != '':
-				column_string += ', '
-				parameter_string += ', '
+		for key in dictionary:
+			if len(column_string) > 0:
+				column_string += ','
+				parameter_string += ','
 
-			column_string += column
+			column_string += key
 			parameter_string += '?'
-			parameters.append(dict.get(column, None))
+
+			parameters.append(dictionary[key])
 
 		with self.database.get_connection() as connection:
 			cursor = connection.execute('INSERT INTO {} ({}) VALUES ({});'.format(self.name, column_string, parameter_string), parameters)

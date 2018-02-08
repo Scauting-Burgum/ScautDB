@@ -20,6 +20,26 @@ class Database:
 		# Return the list containing the tables
 		return tables
 
+	def create_table(self, name, columns):
+		column_string = str()
+		
+		for column in columns:
+			if len(column_string) > 0:
+				column_string += ','
+
+			column_name = column[0]
+			column_data_type = column[1]
+
+			column_string += '{} {}'.format(column_name, column_data_type)
+
+			if len(column) > 2:
+				column_string += ' DEFAULT {}'.format(column[2])
+
+		query_string = 'CREATE TABLE {} ({});'.format(name, column_string)
+
+		with self.get_connection() as connection:
+			connection.execute(query_string)
+
 	def __contains__(self, table):
 		if table == None or table.__class__ != Table or table.database != self:
 			return False
