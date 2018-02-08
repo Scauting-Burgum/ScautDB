@@ -1,2 +1,2 @@
 # ScautDB
-Een abstracte database-library voor SQLite.
+An abstract database-library for SQLite in Python.
