@@ -2,8 +2,14 @@ from row import Row
 
 class Table:
 	def __init__(self, database, name):
-		self.database = database
-		self.name = name
+		from database import Database
+		if not isinstance(database, Database):
+			raise TypeError('the \"database\" argument is not an instance of ScautDB.Database')
+		elif not isinstance(name, str):
+			raise TypeError('the \"name\" argument is not a string')
+		else:
+			self.database = database
+			self.name = name
 
 	@property
 	def columns(self):
