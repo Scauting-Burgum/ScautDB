@@ -20,8 +20,8 @@ class Table:
 	@property
 	def columns(self):
 		with self.database.get_connection() as connection:
-			cursor = connection.execute('select * from {} LIMIT 1;'.format(self.name))
-			columns = [row[0] for row in cursor.description]
+			cursor = connection.execute('PRAGMA table_info({});'.format(self.name))
+			columns = [row[1] for row in cursor]
 		return columns
 
 	@property
