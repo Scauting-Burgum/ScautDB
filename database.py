@@ -1,6 +1,5 @@
 import sqlite3
 from table import Table
-from exceptions import DuplicateTableError
 
 class Database:
 	def __init__(self, filename):
@@ -51,6 +50,7 @@ class Database:
 			except sqlite3.OperationalError as exception:
 				duplicate_table_message = 'table {} already exists'.format(name)
 				if exception.args[0] == duplicate_table_message:
+					from exceptions import DuplicateTableError
 					raise DuplicateTableError(duplicate_table_message) from exception
 
 		return self[name]
