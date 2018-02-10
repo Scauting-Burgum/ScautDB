@@ -22,6 +22,9 @@ class Table:
 		with self.database.get_connection() as connection:
 			cursor = connection.execute('PRAGMA table_info({});'.format(self.name))
 			columns = [row[1] for row in cursor]
+			if columns == []:
+				from exceptions import MissingTableError
+				raise MissingTableError('table {} does not exist'.format(self.name))
 		return columns
 
 	@property
