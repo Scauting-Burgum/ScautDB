@@ -3,7 +3,7 @@ class Database:
 		self.filename = filename
 
 	def get_connection(self):
-		from sqlite3 import connect
+		import sqlite3
 		# Return a connection to the database
 		return sqlite3.connect(self.filename)
 
