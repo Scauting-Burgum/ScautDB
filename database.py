@@ -3,7 +3,10 @@ from table import Table
 
 class Database:
 	def __init__(self, filename):
-		self.filename = filename
+		if isinstance(filename, str):
+			self.filename = filename
+		else:
+			raise TypeError('Filename should be a string!')
 
 	def get_connection(self):
 		# Return a connection to the database
