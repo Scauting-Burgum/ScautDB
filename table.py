@@ -3,13 +3,19 @@ from row import Row
 class Table:
 	def __init__(self, database, name):
 		from database import Database
+
 		if not isinstance(database, Database):
 			raise TypeError('the \"database\" argument is not an instance of ScautDB.Database')
 		elif not isinstance(name, str):
 			raise TypeError('the \"name\" argument is not a string')
-		else:
-			self.database = database
-			self.name = name
+
+		self.database = database
+		self.name = name
+
+		from exceptions import MissingTableError
+
+		if not self in self.database:
+			raise MissingTableError('table {} does not exist'.format(self.name))
 
 	@property
 	def columns(self):
