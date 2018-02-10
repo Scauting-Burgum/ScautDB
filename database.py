@@ -22,7 +22,7 @@ class Database:
 
 	def create_table(self, name, columns):
 		column_string = str()
-		
+
 		for column in columns:
 			if len(column_string) > 0:
 				column_string += ','
@@ -33,7 +33,11 @@ class Database:
 			column_string += '{} {}'.format(column_name, column_data_type)
 
 			if len(column) > 2:
-				column_string += ' DEFAULT {}'.format(column[2])
+				if column[2].__class__ == str:
+					default_value = '"{}"'.format(column[2])
+				else:
+					default_value = column[2]
+				column_string += ' DEFAULT {}'.format(default_value)
 
 		query_string = 'CREATE TABLE {} ({});'.format(name, column_string)
 
