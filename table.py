@@ -1,5 +1,3 @@
-from row import Row
-
 class Table:
 	def __init__(self, database, name):
 		self.database = database
@@ -16,10 +14,12 @@ class Table:
 	def rows(self):
 		with self.database.get_connection() as connection:
 			cursor = connection.execute('select rowid from ' + self.name + ';')
+			from row import Row
 			rows = [Row(self, row[0]) for row in cursor]
 		return rows
 
 	def __contains__(self, row):
+		from row import Row
 		if row == None or row.__class__ != Row or row.table != self:
 			return False
 		else:
@@ -32,6 +32,7 @@ class Table:
 		return iter(self.rows)
 
 	def __getitem__(self, id):
+		from row import Row
 		row = Row(self, id)
 		if row in self:
 			return row
@@ -64,4 +65,5 @@ class Table:
 
 		with self.database.get_connection() as connection:
 			cursor = connection.execute('INSERT INTO {} ({}) VALUES ({});'.format(self.name, column_string, parameter_string), parameters)
+			from row import Row
 			return Row(self, cursor.lastrowid)
