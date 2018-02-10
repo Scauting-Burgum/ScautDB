@@ -30,8 +30,13 @@ class Table:
 	@property
 	def rows(self):
 		with self.database.get_connection() as connection:
-			cursor = connection.execute('select rowid from ' + self.name + ';')
-			rows = [Row(self, row[0]) for row in cursor]
+			from sqlite3 import OperationalError
+			try:
+				cursor = connection.execute('select rowid from ' + self.name + ';')
+				rows = [Row(self, row[0]) for row in cursor]
+			except OperationalError as exception:
+				from exceptions import MissingTableError
+				raise MissingTableError('There is no table in the database with the name:\'{}\''.format(self.name)) from exception
 		return rows
 
 	def __contains__(self, row):
