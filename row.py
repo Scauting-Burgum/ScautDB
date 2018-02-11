@@ -50,5 +50,9 @@ class Row:
 		return not self.__eq__(other)
 
 	def delete(self):
+		if not self in self.table:
+			from exceptions import MissingRowError
+			raise MissingRowError('no row with rowid: {} in table: {}'.format(self.id, self.table.name))
+
 		with self.table.database.get_connection() as connection:
 			connection.execute('DELETE FROM {} WHERE rowid=?;'.format(self.table.name), [self.id])
