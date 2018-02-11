@@ -185,5 +185,28 @@ class TestRow(unittest.TestCase):
         self.assertFalse(row == row2)
         self.assertTrue(row == row)
 
+class TestTable(unittest.TestCase):
+    def test___init__(self):
+        from table import Table
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Table.__init__.db')
+        except OSError:
+            pass
+
+        db = Database('test_Table.__init__.db')
+
+        from exceptions import MissingTableError
+
+        with self.assertRaises(MissingTableError):
+            Table(db, 'people')
+
+        actual_table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER', 0)])
+        expected_table = Table(db, 'people')
+
+        self.assertEqual(expected_table, actual_table)
+
 if __name__ == '__main__':
     unittest.main()
