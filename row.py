@@ -24,16 +24,17 @@ class Row:
 			connection.execute('UPDATE {} SET {} = ? WHERE rowid = ?;'.format(self.table.name, key), (value, self.id))
 
 	def __getitem__(self, key):
+		if not self in self.table:
+			from exceptions import MissingRowError
+			raise MissingRowError('no row with rowid: {} in table: {}'.format(self.id, self.table.name))
+
+		if not key in self.table.columns:
+			from exceptions import MissingColumnError
+			raise MissingColumnError('no column: {} in table: {}').format(key, self.table.name))
+
 		with self.table.database.get_connection() as connection:
-			# Check if the column exists in the table
-			if key in self.table.columns:
-				# Select the value from the database
-				cursor = connection.execute("SELECT {} FROM {} WHERE rowid=?;".format(key, self.table.name), [self.id])
-				# Return the value
-				return cursor.fetchone()[0]
-			else:
-				# Raise a KeyError
-				raise KeyError("There is no column in table:'{}' with the name:'{}'!".format(self.table.name, key))
+			cursor = connection.execute('SELECT {} FROM {} WHERE rowid = ?;'.format(key, self.table.name), [self.id])
+			return cursor.fetchone()
 
 	def __iter__(self):
 		# Create a list containing each value, then return the iterator for that list
