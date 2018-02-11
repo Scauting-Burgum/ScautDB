@@ -491,5 +491,33 @@ class TestDatabase(unittest.TestCase):
 
         self.assertEqual(db.tables, [table, table2])
 
+    def test_create_table(self):
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Database.tables.db')
+        except OSError:
+            pass
+
+        db = Database('test_Database.tables.db')
+
+        table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER', 0)])
+
+        self.assertEqual(table, db['people'])
+
+        self.assertEqual(table.database, db)
+        self.assertEqual(table.name, 'people')
+
+        with db.get_connection() as connection:
+            cursor = connection.execute('PRAGMA table_info(\'people\');')
+            actual_data = [(row[1], row[2], row[4]) for row in cursor]
+            self.assertEqual([('name', 'TEXT', None), ('age', 'INTEGER', '0')], actual_data)
+
+        from exceptions import DuplicateTableError
+
+        with self.assertRaises(DuplicateTableError):
+            db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER', 0)])
+
 if __name__ == '__main__':
     unittest.main()
