@@ -379,5 +379,23 @@ class TestTable(unittest.TestCase):
         with self.assertRaises(MissingTableError):
             table[1]
 
+    def test___eq__(self):
+        from table import Table
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Table.__eq__.db')
+        except OSError:
+            pass
+
+        db = Database('test_Table.__eq__.db')
+
+        table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER', 0)])
+        table2 = db.create_table('companies', [('name', 'TEXT'), ('address', 'TEXT')])
+
+        self.assertEqual(table, table)
+        self.assertNotEqual(table, table2)
+
 if __name__ == '__main__':
     unittest.main()
