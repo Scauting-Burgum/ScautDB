@@ -4,8 +4,14 @@ class TestRow(unittest.TestCase):
     def test___init__(self):
         from row import Row
         from database import Database
+        import os
 
-        db = Database('test___init__.db')
+        try:
+            os.remove('test_Row.__init__.db')
+        except OSError:
+            pass
+
+        db = Database('test_Row.__init__.db')
 
         with self.assertRaises(TypeError):
             Row(None, 1)
@@ -19,7 +25,8 @@ class TestRow(unittest.TestCase):
 
         expectedRow = table.insert({'name':'Albert', 'age':13})
 
-        self.assertEquals(Row(table, 1), expectedRow)
+        self.assertEqual(Row(table, 1), expectedRow)
+
 
 if __name__ == '__main__':
     unittest.main()
