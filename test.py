@@ -460,5 +460,20 @@ class TestDatabase(unittest.TestCase):
         with self.assertRaises(TypeError):
             Database(None)
 
+    def test_get_connection(self):
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Database.get_connection.db')
+        except OSError:
+            pass
+
+        db = Database('test_Database.get_connection.db')
+
+        from sqlite3 import Connection
+
+        self.assertIsInstance(db.get_connection(), Connection)
+
 if __name__ == '__main__':
     unittest.main()
