@@ -269,5 +269,42 @@ class TestTable(unittest.TestCase):
         with self.assertRaises(MissingTableError):
             table.rows
 
+    def test___contains__(self):
+        from table import Table
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Table.__contains__.db')
+        except OSError:
+            pass
+
+        db = Database('test_Table.__contains__.db')
+
+        table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER', 0)])
+
+        row = table.insert({'name':'Albert', 'age':13})
+
+        self.assertTrue(row in table)
+
+        row2 = table.insert({'name':'Joran', 'age':13})
+
+        row2.delete()
+
+        self.assertFalse(row2 in table)
+
+        try:
+            import os
+            os.remove('test_Table.__contains__.db')
+        except OSError:
+            pass
+
+        db = Database('test_Table.__contains__.db')
+
+        from exceptions import MissingTableError
+
+        with self.assertRaises(MissingTableError):
+            row in table
+
 if __name__ == '__main__':
     unittest.main()
