@@ -54,6 +54,13 @@ class TestRow(unittest.TestCase):
         with self.assertRaises(MissingColumnError):
             row['nonexistentcolumn'] = 'A very boring value...'
 
+        row.delete()
+
+        from exceptions import MissingRowError
+
+        with self.assertRaises(MissingRowError):
+            row['age'] = 14
+
     def test___getitem__(self):
         from row import Row
         from database import Database
@@ -79,6 +86,13 @@ class TestRow(unittest.TestCase):
         with self.assertRaises(MissingColumnError):
             row['nonexistentcolumn']
 
+        row.delete()
+
+        from exceptions import MissingRowError
+
+        with self.assertRaises(MissingRowError):
+            row['age']
+
     def test___iter__(self):
         from row import Row
         from database import Database
@@ -100,6 +114,13 @@ class TestRow(unittest.TestCase):
         actual_list = [field for field in row]
 
         self.assertEqual(expected_list, actual_list)
+
+        row.delete()
+
+        from exceptions import MissingRowError
+
+        with self.assertRaises(MissingRowError):
+            row['age'] = 14
 
 if __name__ == '__main__':
     unittest.main()
