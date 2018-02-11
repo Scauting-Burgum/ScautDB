@@ -542,5 +542,25 @@ class TestDatabase(unittest.TestCase):
 
         self.assertNotIn(table, db)
 
+    def test___getitem__(self):
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Database.__getitem__.db')
+        except OSError:
+            pass
+
+        db = Database('test_Database.__getitem__.db')
+
+        table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER', 0)])
+
+        self.assertEqual(table, db['people'])
+
+        from exceptions import MissingTableError
+
+        with self.assertRaises(MissingTableError):
+            db['companies']
+
 if __name__ == '__main__':
     unittest.main()
