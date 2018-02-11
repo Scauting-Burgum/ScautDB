@@ -567,16 +567,32 @@ class TestDatabase(unittest.TestCase):
 
         try:
             import os
-            os.remove('test_Database.__getitem__.db')
+            os.remove('test_Database.__iter__.db')
         except OSError:
             pass
 
-        db = Database('test_Database.__getitem__.db')
+        db = Database('test_Database.__iter__.db')
 
         table1 = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER', 0)])
         table2 = db.create_table('companies', [('name', 'TEXT'), ('address', 'TEXT')])
 
         self.assertEqual([table for table in db], [table1, table2])
+
+    def test___eq__(self):
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Database.__eq__1.db')
+            os.remove('test_Database.__eq__2.db')
+        except OSError:
+            pass
+
+        db1 = Database('test_Database.__eq__1.db')
+        db2 = Database('test_Database.__eq__2.db')
+
+        self.assertTrue(db1 == db1)
+        self.assertFalse(db1 == db2)
 
 if __name__ == '__main__':
     unittest.main()
