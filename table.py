@@ -80,6 +80,10 @@ class Table:
 		parameters = list()
 
 		for key in dictionary:
+			if not key in self.columns:
+				from exceptions import MissingColumnError
+				raise MissingColumnError('no column: {} in table: {}'.format(key, self.name))
+
 			if len(column_string) > 0:
 				column_string += ','
 				parameter_string += ','
