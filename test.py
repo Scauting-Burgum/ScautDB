@@ -562,5 +562,21 @@ class TestDatabase(unittest.TestCase):
         with self.assertRaises(MissingTableError):
             db['companies']
 
+    def test___iter__(self):
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Database.__getitem__.db')
+        except OSError:
+            pass
+
+        db = Database('test_Database.__getitem__.db')
+
+        table1 = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER', 0)])
+        table2 = db.create_table('companies', [('name', 'TEXT'), ('address', 'TEXT')])
+
+        self.assertEqual([table for table in db], [table1, table2])
+
 if __name__ == '__main__':
     unittest.main()
