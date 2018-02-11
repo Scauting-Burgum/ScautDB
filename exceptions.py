@@ -3,3 +3,6 @@ class DuplicateTableError(Exception):
 
 class MissingTableError(Exception):
     pass
+
+class MissingRowError(Exception):
+    pass

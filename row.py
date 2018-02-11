@@ -1,7 +1,15 @@
 class Row:
 	def __init__(self, table, id):
+		from table import Table
+		if not isinstance(table, Table):
+			raise TypeError('argument \'table\' has to be of the type ScautingDB.Table')
+
 		self.table = table
 		self.id = id
+
+		if not self in table:
+			from exceptions import MissingRowError
+			raise MissingRowError('no row with rowid: {} in table: {}'.format(self.id, self.table.name))
 
 	def __setitem__(self, key, value):
 		with self.table.database.get_connection() as connection:
