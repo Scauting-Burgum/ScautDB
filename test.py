@@ -441,7 +441,24 @@ class TestTable(unittest.TestCase):
         from exceptions import MissingColumnError
 
         with self.assertRaises(MissingColumnError):
-            table.insert({'name':'Albert', 'address':'Somewhere'})        
+            table.insert({'name':'Albert', 'address':'Somewhere'})
+
+class TestDatabase(unittest.TestCase):
+    def test___init__(self):
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Database.__init__.db')
+        except OSError:
+            pass
+
+        db = Database('test_Table.__init__.db')
+
+        self.assertIsInstance(db, Database)
+
+        with self.assertRaises(TypeError):
+            Database(None)
 
 if __name__ == '__main__':
     unittest.main()
