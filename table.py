@@ -15,7 +15,7 @@ class Table:
 		from exceptions import MissingTableError
 
 		if not self in self.database:
-			raise MissingTableError('table {} does not exist'.format(self.name))
+			raise MissingTableError('no such table: {}'.format(self.name))
 
 	@property
 	def columns(self):
@@ -35,8 +35,9 @@ class Table:
 				cursor = connection.execute('select rowid from ' + self.name + ';')
 				rows = [Row(self, row[0]) for row in cursor]
 			except OperationalError as exception:
-				from exceptions import MissingTableError
-				raise MissingTableError('There is no table in the database with the name:\'{}\''.format(self.name)) from exception
+				if exception.args[0] == 'no such table: {}'.format(self.name):
+					from exceptions import MissingTableError
+					raise MissingTableError(exception.args[0]) from exception
 		return rows
 
 	def __contains__(self, row):
@@ -49,8 +50,9 @@ class Table:
 					cursor = connection.execute('select EXISTS(select rowid from {} where rowid = ?);'.format(self.name), [row.id])
 					return cursor.fetchone()[0]
 				except OperationalError as error:
-					if error.args[0] == 'no such table: {}'.format(self.name)
-					raise MissingTableError(error.args[0])
+					if error.args[0] == 'no such table: {}'.format(self.name):
+						from exceptions import MissingTableError
+						raise MissingTableError(error.args[0])
 
 	def __iter__(self):
 		# Return an iterator on the list of tables
