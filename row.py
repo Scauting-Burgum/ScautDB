@@ -14,15 +14,14 @@ class Row:
 	def __setitem__(self, key, value):
 		if not self in self.table:
 			from exceptions import MissingRowError
-			raise MissingRowError('no row with rowid: {} in table: {}').format(self.id, self.table.name))
-		# Check if the column exists in the table
-		elif not key in self.table.columns:
-			# Raise a KeyError
-			raise KeyError("There is no column in table:'{}' with the name:'{}'!".format(self.table.name, key))
-		else:
-			with self.table.database.get_connection() as connection:
-				# Execute the update statement
-				connection.execute("UPDATE {} SET {}=? WHERE rowid = ?;".format(self.table.name, key), [value, self.id])
+			raise MissingRowError('no row with rowid: {} in table: {}'.format(self.id, self.table.name))
+
+		if not key in self.table.columns:
+			from exceptions import MissingColumnError
+			raise MissingColumnError('no column: {} in table: {}').format(key, self.table.name))
+
+		with self.table.database.get_connection() as connection:
+			connection.execute('UPDATE {} SET {} = ? WHERE rowid = ?;'.format(self.table.name, key), (value, self.id))
 
 	def __getitem__(self, key):
 		with self.table.database.get_connection() as connection:

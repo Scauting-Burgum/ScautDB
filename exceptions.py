@@ -6,3 +6,6 @@ class MissingTableError(Exception):
 
 class MissingRowError(Exception):
     pass
+
+class MissingColumnError(Exception):
+    pass
