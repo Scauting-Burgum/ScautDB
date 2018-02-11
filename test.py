@@ -122,5 +122,48 @@ class TestRow(unittest.TestCase):
         with self.assertRaises(MissingRowError):
             row['age'] = 14
 
+    def test_delete(self):
+        from row import Row
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Row.delete.db')
+        except OSError:
+            pass
+
+        db = Database('test_Row.delete.db')
+
+        table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER', 0)])
+
+        row = table.insert({'name':'Albert', 'age':13})
+
+        row.delete()
+
+        from exceptions import MissingRowError
+
+        with self.assertRaises(MissingRowError):
+            Row(table, 1)
+
+    def test___ne__(self):
+        from row import Row
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Row.__ne__.db')
+        except OSError:
+            pass
+
+        db = Database('test_Row.__ne__.db')
+
+        table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER', 0)])
+
+        row = table.insert({'name':'Albert', 'age':13})
+        row2 = table.insert({'name':'Joran', 'age':13})
+
+        self.assertTrue(row != row2)
+        self.assertFalse(row != row)
+
 if __name__ == '__main__':
     unittest.main()
