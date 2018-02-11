@@ -165,5 +165,25 @@ class TestRow(unittest.TestCase):
         self.assertTrue(row != row2)
         self.assertFalse(row != row)
 
+    def test___eq__(self):
+        from row import Row
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Row.__eq__.db')
+        except OSError:
+            pass
+
+        db = Database('test_Row.__eq__.db')
+
+        table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER', 0)])
+
+        row = table.insert({'name':'Albert', 'age':13})
+        row2 = table.insert({'name':'Joran', 'age':13})
+
+        self.assertFalse(row == row2)
+        self.assertTrue(row == row)
+
 if __name__ == '__main__':
     unittest.main()
