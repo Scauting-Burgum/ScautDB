@@ -403,17 +403,45 @@ class TestTable(unittest.TestCase):
 
         try:
             import os
-            os.remove('test_Table.__eq__.db')
+            os.remove('test_Table.__ne__.db')
         except OSError:
             pass
 
-        db = Database('test_Table.__eq__.db')
+        db = Database('test_Table.__ne__.db')
 
         table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER', 0)])
         table2 = db.create_table('companies', [('name', 'TEXT'), ('address', 'TEXT')])
 
         self.assertFalse(table != table)
         self.assertTrue(table != table2)
+
+    def test_insert(self):
+        from table import Table
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Table.insert.db')
+        except OSError:
+            pass
+
+        db = Database('test_Table.insert.db')
+
+        table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER', 0)])
+
+        row = table.insert({'name':'Albert', 'age':13})
+
+        self.assertEqual(row, table[1])
+
+        row2 = table.insert({'name':'Joran'})
+
+        self.assertEqual(row2, table[2])
+        self.assertEqual(row2['age'], 0)
+
+        from exceptions import MissingColumnError
+
+        with self.assertRaises(MissingColumnError):
+            table.insert({'name':'Albert', 'address':'Somewhere'})        
 
 if __name__ == '__main__':
     unittest.main()
