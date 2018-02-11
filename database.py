@@ -1,6 +1,9 @@
 class Database:
 	def __init__(self, filename):
-		self.filename = filename
+		if isinstance(filename, str):
+			self.filename = filename
+		else:
+			raise TypeError('Filename should be a string!')
 
 	def get_connection(self):
 		import sqlite3
@@ -44,7 +47,13 @@ class Database:
 		query_string = 'CREATE TABLE {} ({});'.format(name, column_string)
 
 		with self.get_connection() as connection:
-			connection.execute(query_string)
+			try:
+				connection.execute(query_string)
+			except sqlite3.OperationalError as exception:
+				duplicate_table_message = 'table {} already exists'.format(name)
+				if exception.args[0] == duplicate_table_message:
+					from exceptions import DuplicateTableError
+					raise DuplicateTableError(duplicate_table_message) from exception
 
 		return self[name]
 
@@ -58,16 +67,8 @@ class Database:
 				return cursor.fetchone()[0]
 
 	def __getitem__(self, key):
-		from table import Table
-		# Create a table object with said name
-		table = Table(self, key)
-		# Check if table exists
-		if table in self:
-			# Return the table
-			return table
-		else:
-			# Throw a KeyException
-			raise KeyError('There is no table in the database with the name:\'{}\''.format(key))
+    from table import Table
+		return Table(self, key)
 
 	def __iter__(self):
 		# Return an iterator on the list of tables
