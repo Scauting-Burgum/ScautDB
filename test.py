@@ -475,5 +475,21 @@ class TestDatabase(unittest.TestCase):
 
         self.assertIsInstance(db.get_connection(), Connection)
 
+    def test_tables(self):
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Database.tables.db')
+        except OSError:
+            pass
+
+        db = Database('test_Database.tables.db')
+
+        table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER', 0)])
+        table2 = db.create_table('companies', [('name', 'TEXT'), ('address', 'TEXT')])
+
+        self.assertEqual(db.tables, [table, table2])
+
 if __name__ == '__main__':
     unittest.main()
