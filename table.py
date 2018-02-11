@@ -98,6 +98,7 @@ class Table:
 			from sqlite3 import OperationalError
 			try:
 				cursor = connection.execute('INSERT INTO {} ({}) VALUES ({});'.format(self.name, column_string, parameter_string), parameters)
+				connection.commit()
 				from row import Row
 				return Row(self, cursor.lastrowid)
 			except OperationalError as error:
