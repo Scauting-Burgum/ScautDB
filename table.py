@@ -1,5 +1,3 @@
-from row import Row
-
 class Table:
 	def __init__(self, database, name):
 		from database import Database
@@ -32,6 +30,7 @@ class Table:
 			from sqlite3 import OperationalError
 			try:
 				cursor = connection.execute('select rowid from ' + self.name + ';')
+        from row import Row
 				rows = [Row(self, row[0]) for row in cursor]
 			except OperationalError as exception:
 				if exception.args[0] == 'no such table: {}'.format(self.name):
@@ -40,6 +39,7 @@ class Table:
 		return rows
 
 	def __contains__(self, row):
+		from row import Row
 		if row == None or row.__class__ != Row or row.table != self:
 			return False
 		else:
@@ -58,6 +58,7 @@ class Table:
 		return iter(self.rows)
 
 	def __getitem__(self, id):
+		from row import Row
 		row = Row(self, id)
 		if row in self:
 			return row
@@ -97,6 +98,7 @@ class Table:
 			from sqlite3 import OperationalError
 			try:
 				cursor = connection.execute('INSERT INTO {} ({}) VALUES ({});'.format(self.name, column_string, parameter_string), parameters)
+        from row import Row
 				return Row(self, cursor.lastrowid)
 			except OperationalError as error:
 				if error.args[0] == 'no such table: {}'.format(self.name):

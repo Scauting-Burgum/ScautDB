@@ -1,6 +1,3 @@
-import sqlite3
-from table import Table
-
 class Database:
 	def __init__(self, filename):
 		if isinstance(filename, str):
@@ -9,6 +6,7 @@ class Database:
 			raise TypeError('Filename should be a string!')
 
 	def get_connection(self):
+		import sqlite3
 		# Return a connection to the database
 		return sqlite3.connect(self.filename)
 
@@ -18,6 +16,10 @@ class Database:
 		with self.get_connection() as connection:
 			# Fetch the name of each table
 			cursor = connection.execute("SELECT name FROM sqlite_master WHERE type='table';")
+
+			# Import Table
+			from table import Table
+
 			# Create a list of tables
 			tables = [Table(self, row[0]) for row in cursor]
 		# Return the list containing the tables
@@ -56,6 +58,7 @@ class Database:
 		return self[name]
 
 	def __contains__(self, table):
+		from table import Table
 		if table == None or table.__class__ != Table or table.database != self:
 			return False
 		else:
@@ -64,6 +67,7 @@ class Database:
 				return cursor.fetchone()[0]
 
 	def __getitem__(self, key):
+    from table import Table
 		return Table(self, key)
 
 	def __iter__(self):
