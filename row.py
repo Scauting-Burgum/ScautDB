@@ -18,7 +18,7 @@ class Row:
 
 		if not key in self.table.columns:
 			from exceptions import MissingColumnError
-			raise MissingColumnError('no column: {} in table: {}').format(key, self.table.name))
+			raise MissingColumnError('no column: {} in table: {}'.format(key, self.table.name))
 
 		with self.table.database.get_connection() as connection:
 			connection.execute('UPDATE {} SET {} = ? WHERE rowid = ?;'.format(self.table.name, key), (value, self.id))
