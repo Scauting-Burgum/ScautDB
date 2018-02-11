@@ -60,7 +60,7 @@ class TestRow(unittest.TestCase):
 
         try:
             import os
-            os.remove('test_Row.__setitem__.db')
+            os.remove('test_Row.__getitem__.db')
         except OSError:
             pass
 
@@ -78,6 +78,28 @@ class TestRow(unittest.TestCase):
 
         with self.assertRaises(MissingColumnError):
             row['nonexistentcolumn']
+
+    def test___iter__(self):
+        from row import Row
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Row.__iter__.db')
+        except OSError:
+            pass
+
+        db = Database('test_Row.__iter__.db')
+
+        table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER', 0)])
+
+        row = table.insert({'name':'Albert', 'age':13})
+
+        expected_list = ['Albert', 13]
+
+        actual_list = [field for field in row]
+
+        self.assertEqual(expected_list, actual_list)
 
 if __name__ == '__main__':
     unittest.main()
