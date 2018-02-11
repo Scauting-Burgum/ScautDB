@@ -594,5 +594,21 @@ class TestDatabase(unittest.TestCase):
         self.assertTrue(db1 == db1)
         self.assertFalse(db1 == db2)
 
+    def test___ne__(self):
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Database.__ne__1.db')
+            os.remove('test_Database.__ne__2.db')
+        except OSError:
+            pass
+
+        db1 = Database('test_Database.__ne__1.db')
+        db2 = Database('test_Database.__ne__2.db')
+
+        self.assertFalse(db1 != db1)
+        self.assertTrue(db1 != db2)
+
 if __name__ == '__main__':
     unittest.main()
