@@ -34,7 +34,7 @@ class Row:
 
 		with self.table.database.get_connection() as connection:
 			cursor = connection.execute('SELECT {} FROM {} WHERE rowid = ?;'.format(key, self.table.name), [self.id])
-			return cursor.fetchone()
+			return cursor.fetchone()[0]
 
 	def __iter__(self):
 		# Create a list containing each value, then return the iterator for that list
