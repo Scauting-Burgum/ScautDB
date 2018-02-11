@@ -64,15 +64,7 @@ class Database:
 				return cursor.fetchone()[0]
 
 	def __getitem__(self, key):
-		# Create a table object with said name
-		table = Table(self, key)
-		# Check if table exists
-		if table in self:
-			# Return the table
-			return table
-		else:
-			# Throw a KeyException
-			raise KeyError('There is no table in the database with the name:\'{}\''.format(key))
+		return Table(self, key)
 
 	def __iter__(self):
 		# Return an iterator on the list of tables
