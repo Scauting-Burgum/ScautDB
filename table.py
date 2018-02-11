@@ -44,8 +44,13 @@ class Table:
 			return False
 		else:
 			with self.database.get_connection() as connection:
-				cursor = connection.execute('select EXISTS(select rowid from {} where rowid = ?);'.format(self.name), [row.id])
-				return cursor.fetchone()[0]
+				from sqlite3 import OperationalError
+				try:
+					cursor = connection.execute('select EXISTS(select rowid from {} where rowid = ?);'.format(self.name), [row.id])
+					return cursor.fetchone()[0]
+				except OperationalError as error:
+					if error.args[0] == 'no such table: {}'.format(self.name)
+					raise MissingTableError(error.args[0])
 
 	def __iter__(self):
 		# Return an iterator on the list of tables
