@@ -286,13 +286,13 @@ class TestTable(unittest.TestCase):
 
         row = table.insert({'name':'Albert', 'age':13})
 
-        self.assertTrue(row in table)
+        self.assertIn(row, table)
 
         row2 = table.insert({'name':'Joran', 'age':13})
 
         row2.delete()
 
-        self.assertFalse(row2 in table)
+        self.assertNotIn(row2, table)
 
         try:
             import os
@@ -496,11 +496,11 @@ class TestDatabase(unittest.TestCase):
 
         try:
             import os
-            os.remove('test_Database.tables.db')
+            os.remove('test_Database.create_table.db')
         except OSError:
             pass
 
-        db = Database('test_Database.tables.db')
+        db = Database('test_Database.create_table.db')
 
         table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER', 0)])
 
@@ -518,6 +518,29 @@ class TestDatabase(unittest.TestCase):
 
         with self.assertRaises(DuplicateTableError):
             db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER', 0)])
+
+    def test___contains__(self):
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Database.__contains__.db')
+        except OSError:
+            pass
+
+        db = Database('test_Database.__contains__.db')
+
+        table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER', 0)])
+
+        self.assertIn(table, db)
+
+        try:
+            import os
+            os.remove('test_Database.__contains__.db')
+        except OSError:
+            pass
+
+        self.assertNotIn(table, db)
 
 if __name__ == '__main__':
     unittest.main()
