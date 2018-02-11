@@ -13,7 +13,6 @@ class Table:
 		self.name = name
 
 		from exceptions import MissingTableError
-
 		if not self in self.database:
 			raise MissingTableError('no such table: {}'.format(self.name))
 
@@ -63,7 +62,8 @@ class Table:
 		if row in self:
 			return row
 		else:
-			raise KeyError('There is no row in table:\'{}\' with the rowid:{}'.format(self.name, id))
+			from exceptions import MissingRowError
+			raise MissingRowError('no row with rowid: {} in table: {}'.format(id, self.name))
 
 	def __eq__(self, other):
 		if isinstance(self, other.__class__):
