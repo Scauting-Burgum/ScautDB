@@ -120,7 +120,8 @@ class TestRow(unittest.TestCase):
         from exceptions import MissingRowError
 
         with self.assertRaises(MissingRowError):
-            row['age'] = 14
+            for field in row:
+                pass
 
     def test_delete(self):
         from row import Row
@@ -305,6 +306,42 @@ class TestTable(unittest.TestCase):
 
         with self.assertRaises(MissingTableError):
             row in table
+
+    def test___iter__(self):
+        from table import Table
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Table.__contains__.db')
+        except OSError:
+            pass
+
+        db = Database('test_Table.__contains__.db')
+
+        table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER', 0)])
+
+        row = table.insert({'name':'Albert', 'age':13})
+        row2 = table.insert({'name':'Joran', 'age':13})
+
+        actual_list = [row for row in table]
+        expected_list = [row, row2]
+
+        self.assertEqual(actual_list, expected_list)
+
+        try:
+            import os
+            os.remove('test_Table.__contains__.db')
+        except OSError:
+            pass
+
+        db = Database('test_Table.__contains__.db')
+
+        from exceptions import MissingTableError
+
+        with self.assertRaises(MissingTableError):
+            for row in table:
+                pass
 
 if __name__ == '__main__':
     unittest.main()
