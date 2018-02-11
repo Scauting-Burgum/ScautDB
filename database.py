@@ -47,9 +47,10 @@ class Database:
 		query_string = 'CREATE TABLE {} ({});'.format(name, column_string)
 
 		with self.get_connection() as connection:
+			from sqlite3 import OperationalError
 			try:
 				connection.execute(query_string)
-			except sqlite3.OperationalError as exception:
+			except OperationalError as exception:
 				duplicate_table_message = 'table {} already exists'.format(name)
 				if exception.args[0] == duplicate_table_message:
 					from exceptions import DuplicateTableError
