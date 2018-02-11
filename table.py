@@ -10,8 +10,8 @@ class Table:
 		self.database = database
 		self.name = name
 
-		from exceptions import MissingTableError
 		if not self in self.database:
+			from exceptions import MissingTableError
 			raise MissingTableError('no such table: {}'.format(self.name))
 
 	@property
@@ -30,7 +30,7 @@ class Table:
 			from sqlite3 import OperationalError
 			try:
 				cursor = connection.execute('select rowid from ' + self.name + ';')
-        from row import Row
+				from row import Row
 				rows = [Row(self, row[0]) for row in cursor]
 			except OperationalError as exception:
 				if exception.args[0] == 'no such table: {}'.format(self.name):
@@ -98,7 +98,7 @@ class Table:
 			from sqlite3 import OperationalError
 			try:
 				cursor = connection.execute('INSERT INTO {} ({}) VALUES ({});'.format(self.name, column_string, parameter_string), parameters)
-        from row import Row
+				from row import Row
 				return Row(self, cursor.lastrowid)
 			except OperationalError as error:
 				if error.args[0] == 'no such table: {}'.format(self.name):
