@@ -394,8 +394,26 @@ class TestTable(unittest.TestCase):
         table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER', 0)])
         table2 = db.create_table('companies', [('name', 'TEXT'), ('address', 'TEXT')])
 
-        self.assertEqual(table, table)
-        self.assertNotEqual(table, table2)
+        self.assertTrue(table == table)
+        self.assertFalse(table == table2)
+
+    def test___ne__(self):
+        from table import Table
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Table.__eq__.db')
+        except OSError:
+            pass
+
+        db = Database('test_Table.__eq__.db')
+
+        table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER', 0)])
+        table2 = db.create_table('companies', [('name', 'TEXT'), ('address', 'TEXT')])
+
+        self.assertFalse(table != table)
+        self.assertTrue(table != table2)
 
 if __name__ == '__main__':
     unittest.main()
