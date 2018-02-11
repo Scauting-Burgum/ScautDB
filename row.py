@@ -30,7 +30,7 @@ class Row:
 
 		if not key in self.table.columns:
 			from exceptions import MissingColumnError
-			raise MissingColumnError('no column: {} in table: {}').format(key, self.table.name))
+			raise MissingColumnError('no column: {} in table: {}'.format(key, self.table.name))
 
 		with self.table.database.get_connection() as connection:
 			cursor = connection.execute('SELECT {} FROM {} WHERE rowid = ?;'.format(key, self.table.name), [self.id])

@@ -67,7 +67,7 @@ class Database:
 				return cursor.fetchone()[0]
 
 	def __getitem__(self, key):
-    from table import Table
+		from table import Table
 		return Table(self, key)
 
 	def __iter__(self):
