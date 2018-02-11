@@ -90,5 +90,11 @@ class Table:
 			parameters.append(dictionary[key])
 
 		with self.database.get_connection() as connection:
-			cursor = connection.execute('INSERT INTO {} ({}) VALUES ({});'.format(self.name, column_string, parameter_string), parameters)
-			return Row(self, cursor.lastrowid)
+			from sqlite3 import OperationalError
+			try:
+				cursor = connection.execute('INSERT INTO {} ({}) VALUES ({});'.format(self.name, column_string, parameter_string), parameters)
+				return Row(self, cursor.lastrowid)
+			except OperationalError as error:
+				if error.args[0] == 'no such table: {}'.format(self.name):
+					from exceptions import MissingTableError
+					raise MissingTableError(error.args[0]) from errror
