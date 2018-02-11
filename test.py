@@ -313,11 +313,11 @@ class TestTable(unittest.TestCase):
 
         try:
             import os
-            os.remove('test_Table.__contains__.db')
+            os.remove('test_Table.__iter__.db')
         except OSError:
             pass
 
-        db = Database('test_Table.__contains__.db')
+        db = Database('test_Table.__iter__.db')
 
         table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER', 0)])
 
@@ -331,17 +331,53 @@ class TestTable(unittest.TestCase):
 
         try:
             import os
-            os.remove('test_Table.__contains__.db')
+            os.remove('test_Table.__iter__.db')
         except OSError:
             pass
 
-        db = Database('test_Table.__contains__.db')
+        db = Database('test_Table.__iter__.db')
 
         from exceptions import MissingTableError
 
         with self.assertRaises(MissingTableError):
             for row in table:
                 pass
+
+    def test___getitem__(self):
+        from table import Table
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Table.__getitem__.db')
+        except OSError:
+            pass
+
+        db = Database('test_Table.__getitem__.db')
+
+        table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER', 0)])
+
+        row = table.insert({'name':'Albert', 'age':13})
+
+        self.assertEqual(table[1], row)
+
+        row.delete()
+
+        from exceptions import MissingRowError
+
+        with self.assertRaises(MissingRowError):
+            table[1]
+
+        try:
+            import os
+            os.remove('test_Table.__getitem__.db')
+        except OSError:
+            pass
+
+        from exceptions import MissingTableError
+
+        with self.assertRaises(MissingTableError):
+            table[1]
 
 if __name__ == '__main__':
     unittest.main()
