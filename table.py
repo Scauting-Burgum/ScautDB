@@ -54,8 +54,7 @@ class Table:
 						raise MissingTableError(error.args[0])
 
 	def __iter__(self):
-		# Return an iterator on the list of tables
-		return iter(self.rows)
+		return TableIterator(self)
 
 	def __getitem__(self, id):
 		from row import Row
@@ -105,3 +104,24 @@ class Table:
 				if error.args[0] == 'no such table: {}'.format(self.name):
 					from exceptions import MissingTableError
 					raise MissingTableError(error.args[0]) from errror
+
+class TableIterator:
+	def __init__(self, table):
+		self.table = table
+		self.__connection = table.database.get_connection()
+
+		from sqlite3 import OperationalError
+		try:
+			self.__cursor = self.__connection.execute('SELECT ROWID FROM {};'.format(table.name))
+		except OperationalError as exception:
+			from exceptions import MissingTableError
+			raise MissingTableError('No such table: {}'.format(table.name)) from exception
+
+	def __next__(self):
+		result = self.__cursor.fetchone()
+
+		if result != None:
+			from row import Row
+			return Row(self.table, result[0])
+		else:
+			raise StopIteration()
