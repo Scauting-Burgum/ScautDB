@@ -6,16 +6,13 @@ class Query:
 
     @property
     def column_string(self):
-        return 'rowid'
-        # column_string = ''
-        #
-        # for column in self.columns:
-        #     if column_string != '':
-        #         column_string += ','
-        #
-        #     column_string += column
-        #
-        # return column_string
+        column_string = 'rowid'
+        
+        for column in self.columns:
+            column_string += ','
+            column_string += column
+        
+        return column_string
 
     @property
     def filter_string(self):
@@ -44,7 +41,7 @@ class Query:
                         filter_string += process(f)
                         filter_string += ')'
                     else:
-                        if f[0] not in self.table.columns:
+                        if f[0] not in self.table.columns and f[0] != 'rowid':
                             from exceptions import MissingColumnError
                             raise MissingColumnError('No such column: {} in table: {}'.format(f[0], self.table.name))
 
@@ -67,7 +64,10 @@ class Query:
 
                         if f[1] == IN:
                             if isinstance(f[2], Query):
-                                filter_string += ' ({})'.format(str(f[2])[:-1])
+                                subquery_string = str(f[2])[:-1]
+                                if not 'rowid' in f[2].columns:
+                                    subquery_string = subquery_string.replace('rowid,', '', 1)
+                                filter_string += ' ({})'.format(subquery_string)
                             else:
                                 array_substring = ''
                                 for e in f[2]:
