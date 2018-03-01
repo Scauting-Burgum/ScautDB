@@ -19,75 +19,88 @@ class Query:
 
     @property
     def filter_string(self):
-        filter_string = ''
+        def process(filters):
+            filter_string = ''
 
-        previous_segment = None
+            previous_segment = None
 
-        for f in self.filters:
-            if filter_string != '':
-                filter_string += ' '
-            if f in COMBINATORS:
-                if f == AND:
-                    filter_string += 'AND'
-                elif f == OR:
-                    filter_string += 'OR'
-                elif f == NOT:
-                    filter_string += 'NOT'
-                previous_segment = f
-            else:
-                if previous_segment in OPERATORS:
-                    filter_string += 'AND '
-
-                if f[0] not in self.table.columns:
-                    from exceptions import MissingColumnError
-                    raise MissingColumnError('No such column: {} in table: {}'.format(f[0], self.table.name))
-
-                filter_string += '{}'.format(f[0])
-
-                if f[1] == EQUAL:
-                    filter_string += ' ='
-                elif f[1] == IN:
-                    filter_string += ' IN'
-                elif f[1] == LIKE:
-                    filter_string += ' LIKE'
-                elif f[1] == GREATER_THAN:
-                    filter_string += ' >'
-                elif f[1] == LESSER_THAN:
-                    filter_string += ' <'
-                elif f[1] == GREATER_THAN_OR_EQUAL_TO:
-                    filter_string += ' >='
-                elif f[1] == LESSER_THAN_OR_EQUAL_TO:
-                    filter_string += ' <='
-
-                if f[1] == IN:
-                    if isinstance(f[2], Query):
-                        filter_string += ' ({})'.format(str(f[2])[:-1])
-                    else:
-                        array_substring = ''
-                        for e in f[2]:
-                            if array_substring != '':
-                                array_substring += ','
-                            array_substring += '?'
-                        filter_string += ' ({})'.format(array_substring)
+            for f in filters:
+                if filter_string != '':
+                    filter_string += ' '
+                if f in COMBINATORS:
+                    if f == AND:
+                        filter_string += 'AND'
+                    elif f == OR:
+                        filter_string += 'OR'
+                    elif f == NOT:
+                        filter_string += 'NOT'
+                    previous_segment = f
                 else:
-                    filter_string += ' ?'
+                    if previous_segment in OPERATORS:
+                        filter_string += 'AND '
 
-                previous_segment = f[1]
+                    if not isinstance(f[0], str):
+                        filter_string += '('
+                        filter_string += process(f)
+                        filter_string += ')'
+                    else:
+                        if f[0] not in self.table.columns:
+                            from exceptions import MissingColumnError
+                            raise MissingColumnError('No such column: {} in table: {}'.format(f[0], self.table.name))
 
-        return filter_string
+                        filter_string += '{}'.format(f[0])
+
+                        if f[1] == EQUAL:
+                            filter_string += ' ='
+                        elif f[1] == IN:
+                            filter_string += ' IN'
+                        elif f[1] == LIKE:
+                            filter_string += ' LIKE'
+                        elif f[1] == GREATER_THAN:
+                            filter_string += ' >'
+                        elif f[1] == LESSER_THAN:
+                            filter_string += ' <'
+                        elif f[1] == GREATER_THAN_OR_EQUAL_TO:
+                            filter_string += ' >='
+                        elif f[1] == LESSER_THAN_OR_EQUAL_TO:
+                            filter_string += ' <='
+
+                        if f[1] == IN:
+                            if isinstance(f[2], Query):
+                                filter_string += ' ({})'.format(str(f[2])[:-1])
+                            else:
+                                array_substring = ''
+                                for e in f[2]:
+                                    if array_substring != '':
+                                        array_substring += ','
+                                    array_substring += '?'
+                                filter_string += ' ({})'.format(array_substring)
+                        else:
+                            filter_string += ' ?'
+
+                        previous_segment = f[1]
+
+            return filter_string
+        return process(self.filters)
 
     @property
     def parameters(self):
-        parameters = list()
+        def process(filters):
+            parameters = list()
+            
+            for f in filters:
+                if hasattr(f, '__getitem__'):
+                    if not isinstance(f[0], str):
+                        parameters += process(f)
+                    elif isinstance(f[2], Query):
+                        parameters += f[2].parameters
+                    elif isinstance(f[2], str):
+                        parameters.append(f[2])
+                    else:
+                        parameters += f[2]
+            return parameters
 
-        for f in self.filters:
-            if hasattr(f, '__getitem__'):
-                if isinstance(f[2], Query):
-                    parameters += f[2].parameters
-                else:
-                    parameters.append(f[2])
-
-        return parameters
+        return process(self.filters)
 
     def __str__(self):
         return 'SELECT {} FROM {} WHERE {};'.format(self.column_string, self.table.name, self.filter_string)
