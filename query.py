@@ -107,7 +107,11 @@ class Query:
 
     def execute(self):
         with self.table.database.get_connection() as connection:
-            cursor = connection.execute(str(self), self.parameters)
+            query_string = str(self)
+            for column in self.columns:
+        	    if column != 'rowid':
+        	        query_string = query_string.replace(',{}'.format(column), '', 1)
+            cursor = connection.execute(query_string, self.parameters)
             from resultset import ResultSet
             return ResultSet(self.table, cursor)
 
