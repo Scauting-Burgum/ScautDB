@@ -1,5 +1,5 @@
 class Query:
-    def __init__(self, table, columns, filters):
+    def __init__(self, table, columns = list(), filters = list()):
         self.table = table
         self.columns = columns
         self.filters = filters
@@ -103,7 +103,11 @@ class Query:
         return process(self.filters)
 
     def __str__(self):
-        return 'SELECT {} FROM {} WHERE {};'.format(self.column_string, self.table.name, self.filter_string)
+        sql = 'SELECT {} FROM {}'.format(self.column_string, self.table.name)
+        if len(self.filters) > 0:
+            sql += ' WHERE {}'.format(self.filter_string)
+        sql += ';'
+        return sql
 
     def execute(self):
         with self.table.database.get_connection() as connection:
