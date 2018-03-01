@@ -732,5 +732,59 @@ class TestQuery(unittest.TestCase):
 
         self.assertEqual(query.parameters, ['Albert', 'Joran'])
 
+    def test___str__(self):
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Query.__str__.db')
+        except OSError:
+            pass
+
+        db = Database('test_Query.__str__.db')
+
+        table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER')])
+
+        from query import Query
+
+        query = Query(table)
+
+        self.assertEqual(str(query), 'SELECT rowid FROM people;')
+
+        query = Query(table, ['name'])
+
+        self.assertEqual(str(query), 'SELECT rowid,name FROM people;')
+
+        from query import GREATER_THAN
+
+        query = Query(table, ['name'], [('age', GREATER_THAN, 18)])
+
+        self.assertEqual(str(query), 'SELECT rowid,name FROM people WHERE age > ?;')
+
+    def test_execute(self):
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Query.__str__.db')
+        except OSError:
+            pass
+
+        db = Database('test_Query.__str__.db')
+
+        table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER')])
+
+        from query import Query
+
+        query = Query(table)
+
+        rs = query.execute()
+
+        from resultset import ResultSet
+
+        self.assertIsInstance(rs, ResultSet)
+        
+        self.assertEqual([r for r in rs], [])
+
 if __name__ == '__main__':
     unittest.main()
