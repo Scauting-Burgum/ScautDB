@@ -1,3 +1,5 @@
+THREAD_COUNT = 8
+
 class Query:
     def __init__(self, table, columns, filters):
         self.table = table
@@ -17,68 +19,70 @@ class Query:
     @property
     def filter_string(self):
         def process(filters):
-            filter_string = ''
-
-            previous_segment = None
-
-            for f in filters:
-                if filter_string != '':
-                    filter_string += ' '
+            def sub_process(f):
+                sub_filter_string = ''
                 if f in COMBINATORS:
                     if f == AND:
-                        filter_string += 'AND'
+                        sub_filter_string += 'AND'
                     elif f == OR:
-                        filter_string += 'OR'
+                        sub_filter_string += 'OR'
                     elif f == NOT:
-                        filter_string += 'NOT'
-                    previous_segment = f
+                        sub_filter_string += 'NOT'
                 else:
-                    if previous_segment in OPERATORS:
-                        filter_string += 'AND '
-
                     if not isinstance(f[0], str):
-                        filter_string += '('
-                        filter_string += process(f)
-                        filter_string += ')'
+                        sub_filter_string += '('
+                        sub_filter_string += process(f)
+                        sub_filter_string += ')'
                     else:
                         if f[0] not in self.table.columns and f[0] != 'rowid':
                             from exceptions import MissingColumnError
                             raise MissingColumnError('No such column: {} in table: {}'.format(f[0], self.table.name))
 
-                        filter_string += '{}'.format(f[0])
+                        sub_filter_string += '{}'.format(f[0])
 
                         if f[1] == EQUAL:
-                            filter_string += ' ='
+                            sub_filter_string += ' ='
                         elif f[1] == IN:
-                            filter_string += ' IN'
+                            sub_filter_string += ' IN'
                         elif f[1] == LIKE:
-                            filter_string += ' LIKE'
+                            sub_filter_string += ' LIKE'
                         elif f[1] == GREATER_THAN:
-                            filter_string += ' >'
+                            sub_filter_string += ' >'
                         elif f[1] == LESSER_THAN:
-                            filter_string += ' <'
+                            sub_filter_string += ' <'
                         elif f[1] == GREATER_THAN_OR_EQUAL_TO:
-                            filter_string += ' >='
+                            sub_filter_string += ' >='
                         elif f[1] == LESSER_THAN_OR_EQUAL_TO:
-                            filter_string += ' <='
+                            sub_filter_string += ' <='
 
                         if f[1] == IN:
                             if isinstance(f[2], Query):
                                 subquery_string = str(f[2])[:-1]
                                 if not 'rowid' in f[2].columns:
                                     subquery_string = subquery_string.replace('rowid,', '', 1)
-                                filter_string += ' ({})'.format(subquery_string)
+                                sub_filter_string += ' ({})'.format(subquery_string)
                             else:
                                 array_substring = ''
                                 for e in f[2]:
                                     if array_substring != '':
                                         array_substring += ','
                                     array_substring += '?'
-                                filter_string += ' ({})'.format(array_substring)
+                                sub_filter_string += ' ({})'.format(array_substring)
                         else:
-                            filter_string += ' ?'
+                            sub_filter_string += ' ?'
 
-                        previous_segment = f[1]
+                return sub_filter_string
+            
+            from multiprocessing.dummy import Pool as ThreadPool
+            pool = ThreadPool(THREAD_COUNT)
+            results = pool.map(sub_process, self.filters)
+
+            filter_string = ''
+
+            for result in results:
+                if filter_string != '':
+                    filter_string += ' '
+                filter_string += result
 
             return filter_string
         return process(self.filters)
