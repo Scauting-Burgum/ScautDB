@@ -453,7 +453,7 @@ class TestDatabase(unittest.TestCase):
         except OSError:
             pass
 
-        db = Database('test_Table.__init__.db')
+        db = Database('test_Database.__init__.db')
 
         self.assertIsInstance(db, Database)
 
@@ -609,6 +609,182 @@ class TestDatabase(unittest.TestCase):
 
         self.assertFalse(db1 != db1)
         self.assertTrue(db1 != db2)
+
+class TestQuery(unittest.TestCase):
+    def test___init__(self):
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Query.__init__.db')
+        except OSError:
+            pass
+
+        db = Database('test_Query.__init__.db')
+
+        table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER')])
+        
+        from query import Query
+        query = Query(table)
+
+        self.assertIsInstance(query, Query)
+
+    def test_column_string(self):
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Query.column_string.db')
+        except OSError:
+            pass
+
+        db = Database('test_Query.column_string.db')
+
+        table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER')])
+        
+        from query import Query
+        query = Query(table)
+
+        self.assertEqual(query.column_string, 'rowid')
+
+        query = Query(table, ['rowid'])
+
+        self.assertEqual(query.column_string, 'rowid')
+
+        query = Query(table, ['name','age'])
+
+        self.assertEqual(query.column_string, 'rowid,name,age')
+
+    def test_filter_string(self):
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Query.filter_string.db')
+        except OSError:
+            pass
+
+        db = Database('test_Query.filter_string.db')
+
+        table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER')])
+
+        from query import Query
+        query = Query(table)
+
+        self.assertEqual(query.filter_string, '')
+
+        from query import EQUAL
+
+        query = Query(table, filters=[('name', EQUAL, 'A nonexistent name!')])
+
+        self.assertEqual(query.filter_string, 'name = ?')
+
+        from query import GREATER_THAN
+
+        query = Query(table, filters=[(('name', EQUAL, 'A nonexistent name!'), ('age', GREATER_THAN, 18))])
+
+        self.assertEqual(query.filter_string, '(name = ? AND age > ?)')
+
+        from query import NOT, AND, OR
+
+        query = Query(table, filters=[(NOT, (('name', EQUAL, 'Albert'), AND, ('age', EQUAL, 13))), OR, ('name', EQUAL, 'Joran')])
+
+        self.assertEqual(query.filter_string, '(NOT (name = ? AND age = ?)) OR name = ?')
+
+        query1 = Query(table, columns=['name'] ,filters=[('age', GREATER_THAN, 13)])
+
+        from query import IN
+
+        query2 = Query(table, filters=[(NOT, (('name', EQUAL, 'Albert'), AND, ('age', EQUAL, 13))), OR, ('name', IN, query1)])
+
+        self.assertEqual(query2.filter_string, '(NOT (name = ? AND age = ?)) OR name IN (SELECT name FROM people WHERE age > ?)')
+    def test_parameters(self):
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Query.parameters.db')
+        except OSError:
+            pass
+
+        db = Database('test_Query.parameters.db')
+
+        table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER')])
+
+        from query import Query
+        query = Query(table)
+
+        self.assertEqual(query.parameters, [])
+
+        from query import EQUAL, GREATER_THAN
+
+        query1 = Query(table, filters=[(('name', EQUAL, 'A nonexistent name!'), ('age', GREATER_THAN, 18))])
+
+        self.assertEqual(query1.parameters, ['A nonexistent name!', 18])
+
+        from query import IN
+
+        query2 = Query(table, filters=[(('name', EQUAL, 'A nonexistent name!'), ('age', GREATER_THAN, 18)), ('name', IN, query1)])
+
+        self.assertEqual(query2.parameters, ['A nonexistent name!', 18, 'A nonexistent name!', 18])
+
+        query = Query(table, filters=[('name', IN, ['Albert', 'Joran'])])
+
+        self.assertEqual(query.parameters, ['Albert', 'Joran'])
+
+    def test___str__(self):
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Query.__str__.db')
+        except OSError:
+            pass
+
+        db = Database('test_Query.__str__.db')
+
+        table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER')])
+
+        from query import Query
+
+        query = Query(table)
+
+        self.assertEqual(str(query), 'SELECT rowid FROM people;')
+
+        query = Query(table, ['name'])
+
+        self.assertEqual(str(query), 'SELECT rowid,name FROM people;')
+
+        from query import GREATER_THAN
+
+        query = Query(table, ['name'], [('age', GREATER_THAN, 18)])
+
+        self.assertEqual(str(query), 'SELECT rowid,name FROM people WHERE age > ?;')
+
+    def test_execute(self):
+        from database import Database
+
+        try:
+            import os
+            os.remove('test_Query.__str__.db')
+        except OSError:
+            pass
+
+        db = Database('test_Query.__str__.db')
+
+        table = db.create_table('people', [('name', 'TEXT'), ('age', 'INTEGER')])
+
+        from query import Query
+
+        query = Query(table)
+
+        rs = query.execute()
+
+        from resultset import ResultSet
+
+        self.assertIsInstance(rs, ResultSet)
+        
+        self.assertEqual([r for r in rs], [])
 
 if __name__ == '__main__':
     unittest.main()
