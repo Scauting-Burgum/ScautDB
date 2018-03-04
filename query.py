@@ -94,10 +94,10 @@ class Query:
                         parameters += process(f)
                     elif isinstance(f[2], Query):
                         parameters += f[2].parameters
-                    elif isinstance(f[2], str):
-                        parameters.append(f[2])
-                    else:
+                    elif not isinstance(f[2], str) and hasattr(f[2], '__iter__'):
                         parameters += f[2]
+                    else:
+                        parameters.append(f[2])
             return parameters
 
         return process(self.filters)
